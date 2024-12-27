@@ -1,0 +1,25 @@
+{
+  "name": "gitgraf",
+  "version": "1.0.0",
+  "description": "A visualizer for git projects",
+  "main": "dist/main.js",
+  "scripts": {
+    "run": "npx tsc && node dist/main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "git",
+    "visualization",
+    "graph"
+  ],
+  "author": "compf",
+  "license": "ISC",
+  "dependencies": {
+    "command-exists": "^1.2.9",
+    "typescript": "^5.7.2",
+    "vscode-languageserver": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2"
+  }
+}
