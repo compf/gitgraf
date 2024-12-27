@@ -1,0 +1,16 @@
+node_modules
+dist
+temp
+CHATGPT_TOKEN
+GITHUB_TOKEN
+stuff
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+tokens/*
+data/*
+src/playground.ts
+cloned_projects
+.vscode/launch.json
