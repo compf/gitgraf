@@ -44,10 +44,10 @@ export function getDataClumpThreshold(dataClumpTyo:string):number{
 }
 function createExcludePattern():string[]{
     if(sep=="\\"){
-        return [resolve("dist","src","data-clumps-doctor").replaceAll("\\","\\\\")+sep+".*",".*js\.ma"]
+        return [resolve("dist","eclipse.jdt.ls").replaceAll("\\","\\\\")+sep+".*",".*js\.ma"]
     }
     else{
-        return ["dist/src/data-clumps-doctor/.*",".*js\.ma"]
+        return ["dist/eclipse.jdt.ls/.*",".*js\.ma"]
     }
 }
 /**
@@ -57,7 +57,7 @@ function createExcludePattern():string[]{
 function loadAllClasses(){
     let paths:string[]=[]
     let startTime=Date.now()
-    getRelevantFilesRec(resolve("./dist","src"),paths,new FileFilteringContext([".*\.js$"],createExcludePattern(),false))
+    getRelevantFilesRec(resolve("./dist","src",),paths,new FileFilteringContext([".*\.js$"],createExcludePattern(),false))
     for(let path of paths){
         console.log("Loading "+path)
         if (path.endsWith("Configuration.js") || path.endsWith(".map")){

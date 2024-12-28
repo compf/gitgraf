@@ -1,5 +1,4 @@
 import { VCS_Service, getRepoDataFromUrl } from "./VCS_Service";
-const  Octokit = require('@octokit/rest') as any;
 import { spawnSync } from "child_process";
 import fs from "fs"
  
@@ -35,10 +34,7 @@ export class GitHubService extends VCS_Service {
         throw new Error("Method not implemented.");
     }
     createOctokitObject(): any {
-        return new Octokit({
-            auth: this.API_KEY,
-
-        });
+        return {}
     }
     async fork(url: string, newName: string | undefined): Promise<string> {
         let octokit = this.createOctokitObject();

@@ -1,6 +1,7 @@
 import { AbstractStepHandler } from "./stepHandler/AbstractStepHandler"
 import { SimpleCodeObtainingStepHandler } from "./stepHandler/codeObtaining/SimpleCodeObtainingStepHandler";
-export type PipeLineStepName = "CodeObtaining" | "FileFiltering" | "ASTGeneration" | "SimilarityDetection" | "DataClumpDetection" | "DataClumpFiltering" | "NameFinding" | "ClassExtraction" | "ReferenceFinding" | "Refactoring" | "Validation"
+import { SimpleRelevantLocatioDectectionStep } from "./stepHandler/relevantLocationDetection/SimpleRelevantLocationDetectionStep";
+export type PipeLineStepName = "CodeObtaining" | "FileFiltering" | "RelevantLocationDetection" | "RelevantLocationFiltering" 
 export type PipeLineStepType = {
     position: number,
     name: PipeLineStepName,
@@ -25,25 +26,19 @@ export namespace PipeLineStep {
     };
     export const RelevantLocationDetection: PipeLineStepType = {
         position: 1,
-        name: "FileFiltering",
-        isRequired: false,
-        defaultHandler: undefined,
+        name: "RelevantLocationDetection",
+        isRequired: true,
+        defaultHandler: new SimpleRelevantLocatioDectectionStep(),
         associatedContext:"FileFilteringContext"
     };
     export const RelevantLocationFiltering: PipeLineStepType = {
         position:5,
-        name: "DataClumpFiltering",
+        name: "RelevantLocationFiltering",
         isRequired: false,
         defaultHandler: undefined,
         associatedContext:null
     };
-    export const ReferenceFinding: PipeLineStepType = {
-        position:6,
-        name: "ReferenceFinding",
-        isRequired: false,
-        defaultHandler: undefined,
-        associatedContext:"UsageFindingContext"
-    };
+
     
     
 

@@ -5,6 +5,7 @@ import { getRelevantFilesRec, makeUnique, nop, shallIgnore, waitSync } from "../
 import { Configuration } from "../config/Configuration";
 import simpleGit from "simple-git";
 import { ChatMessage } from "../utils/languageModel/AbstractLanguageModel";
+import { Range } from "vscode-languageserver";
 
 export function getContextSerializationBasePath(context:ProjectContext):string{
 const folderName=".gitgraf_data"
@@ -213,8 +214,36 @@ export class LargeLanguageModelContext extends ProjectContext {
         return this.chat
     }
 }
+export type RelevantLocation = {
+    uri: string,
+    name: string,
+    location: Range,
+    kind: number
+}
 export  class RelevantLocationsContext extends ProjectContext{
-    getRelevantLocations(lines:{[path:string]:Set<number>}):void{}
+    relevantLocations:RelevantLocation[]=[]
+    constructor(relevantLocations:RelevantLocation[]) {
+        super()
+        this.relevantLocations=relevantLocations
+    }
+    getRelevantLocations(lines:{[path:string]:Set<number>}):void{
+        for(let loc of this.relevantLocations){
+            if(!(loc.uri in lines)){
+                lines[loc.uri]=new Set<number>()
+            }
+            for(let i=loc.location.start.line;i<=loc.location.end.line;i++){
+                lines[loc.uri].add(i)
+            }
+        }
+    }
+
+    serialize(): void {
+        const usedPath=this.getSerializationPath()
+        fs.writeFileSync(usedPath, JSON.stringify(this.relevantLocations))
+    }
+    getDefaultSerializationPath(): string {
+        return "relevantLocations.json"
+    }
 }
 
 

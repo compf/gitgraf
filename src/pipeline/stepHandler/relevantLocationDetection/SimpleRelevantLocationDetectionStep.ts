@@ -1,41 +1,44 @@
-import { DocumentSymbolParams, Range, ReferenceParams, WorkspaceSymbolParams } from "vscode-languageserver";
-import { EclipseLSP_API, Socket } from "./EclipseLSP_API";
-import { Methods } from "./LanguageServerAPI";
-import { waitSync } from "../utils/Utils";
-import url from "url"
 import { resolve } from "path";
-
-export type SymbolInformation = {
-    uri: string,
-    name: string,
-    location: Range,
-    kind: number
-}
-export class SymbolFinder {
+import url  from "url"
+import { SymbolInformation, DocumentSymbolParams, ReferenceParams } from "vscode-languageserver";
+import { FileFilteringContext, ProjectContext, RelevantLocation, RelevantLocationsContext } from "../../../context/DataContext";
+import { EclipseLSP_API, Socket } from "../../../lsp/EclipseLSP_API";
+import { Methods } from "../../../lsp/LanguageServerAPI";
+import { PipeLineStepType, PipeLineStep } from "../../PipeLineStep";
+import { AbstractStepHandler } from "../AbstractStepHandler";
+import {getRelevantFilesRec} from "../../../utils/Utils"
+export class SimpleRelevantLocatioDectectionStep extends AbstractStepHandler {
+    handle(step: PipeLineStepType, context: ProjectContext, params: any): Promise<ProjectContext> {
+        return this.findSymbols(context)
+       
+    }
+    getExecutableSteps(): PipeLineStepType[] {
+        return [PipeLineStep.RelevantLocationDetection];
+    }
+    addCreatedContextNames(pipeLineStep: PipeLineStepType, createdContexts: Set<string>): void {
+        createdContexts.add(RelevantLocationsContext.name)
+    }
 
     counter: number = 3;
     api: EclipseLSP_API = new EclipseLSP_API()
     balance:number=0;
     visitedSymbols = new Set<string>()
-    projectPathUrl:string;
-    projectPath:string;
+    projectPathUrl?:string;
+    projectPath?:string;
 
-    constructor(projectPath :string){
-        this.projectPath=resolve(projectPath);
-        this.projectPathUrl=url.pathToFileURL(resolve(this.projectPath)).toString();
-        console.log("project path",this.projectPath)
-    }
+
 
 
     pathIds: Set<string> = new Set<string>()
-    async findSymbols(initialPath: string) {
+    async findSymbols(context:ProjectContext):Promise<ProjectContext> {
         let visitedPaths = new Set<string>()
-        initialPath=url.pathToFileURL(resolve(this.projectPath,initialPath)).toString()
-        console.log("initial path",initialPath)
-        let pathStack = [initialPath]
-        let symbolStack: SymbolInformation[] = []
-        return await new Promise<any>(async handleResolver => {
-            let socket = await this.api.init(this.projectPathUrl, (data) => {
+        let pathStack:string[] = []
+        this.projectPathUrl=url.pathToFileURL(context.getProjectPath()).toString()
+        this.projectPath=context.getProjectPath()
+        getRelevantFilesRec(context.getProjectPath(),pathStack,context.getByType(FileFilteringContext))
+        let symbolStack: RelevantLocation[] = []
+        return new Promise<ProjectContext>(async handleResolver => {
+            let socket = await this.api.init(this.projectPathUrl!, (data) => {
               
                 if(data.id==undefined || data.id=="1")return;
                 console.log("receivingU",data)
@@ -47,7 +50,7 @@ export class SymbolFinder {
                     let results = data.result as any[]
                     if(results==undefined)return;
                     for (let r of results) {
-                        let symbol: SymbolInformation = {
+                        let symbol: RelevantLocation = {
                             uri: r.location.uri,
                             name: r.name,
                             location: r.location.range,
@@ -102,12 +105,17 @@ export class SymbolFinder {
                     }
                     console.log("##########################")
                     this.api.close()
-                    handleResolver("")
+                    let symbols:RelevantLocation[]=[]
+                    for(let s of this.visitedSymbols){
+                        symbols.push(JSON.parse(s))
+                    }
+                    handleResolver(  context.buildNewContext(new RelevantLocationsContext(symbols)))
                 }
             });
 
             {
                 for (let p of pathStack) {
+                    p=url.pathToFileURL(resolve(context.getProjectPath(),p)).toString()
                     console.log("path stack",p)
                     this.findSymbolsInFile(p,socket)
                     this.balance++;
@@ -137,7 +145,7 @@ export class SymbolFinder {
 
     }
 
-    findReferences(s: SymbolInformation, socket: Socket) {
+    findReferences(s: RelevantLocation, socket: Socket) {
         let params: ReferenceParams = {
             textDocument: {
                 uri: s.uri
@@ -154,9 +162,4 @@ export class SymbolFinder {
         let msg = this.api.create_request_message(id, Methods.References, params)
         socket.writer.write(msg)
     }
-
-
-
-
-
 }
