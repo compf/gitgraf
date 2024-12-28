@@ -2,7 +2,9 @@ import { DocumentSymbolParams, Range, ReferenceParams, WorkspaceSymbolParams } f
 import { EclipseLSP_API, Socket } from "./EclipseLSP_API";
 import { Methods } from "./LanguageServerAPI";
 import { waitSync } from "../utils/Utils";
-import { url } from "inspector";
+import url from "url"
+import { resolve } from "path";
+
 export type SymbolInformation = {
     uri: string,
     name: string,
@@ -14,16 +16,26 @@ export class SymbolFinder {
     counter: number = 3;
     api: EclipseLSP_API = new EclipseLSP_API()
     balance:number=0;
+    visitedSymbols = new Set<string>()
+    projectPathUrl:string;
+    projectPath:string;
+
+    constructor(projectPath :string){
+        this.projectPath=resolve(projectPath);
+        this.projectPathUrl=url.pathToFileURL(resolve(this.projectPath)).toString();
+        console.log("project path",this.projectPath)
+    }
+
 
     pathIds: Set<string> = new Set<string>()
-    async findSymbols() {
+    async findSymbols(initialPath: string) {
         let visitedPaths = new Set<string>()
-        let visitedSymbols = new Set<string>()
-        let pathStack = ["file:///home/compf/data/uni/master/sem4/data_clump_solver/javaTest/javaTest/src/main/java/org/example/MathStuff.java"]
+        initialPath=url.pathToFileURL(resolve(this.projectPath,initialPath)).toString()
+        console.log("initial path",initialPath)
+        let pathStack = [initialPath]
         let symbolStack: SymbolInformation[] = []
         return await new Promise<any>(async handleResolver => {
-            const projectPath = "/home/compf/data/uni/master/sem4/data_clump_solver/javaTest/javaTest"
-            let socket = await this.api.init(projectPath, (data) => {
+            let socket = await this.api.init(this.projectPathUrl, (data) => {
               
                 if(data.id==undefined || data.id=="1")return;
                 console.log("receivingU",data)
@@ -43,8 +55,8 @@ export class SymbolFinder {
                         };
                         let str=JSON.stringify(symbol,undefined,2)
 
-                        if(!(visitedSymbols.has(str))){
-                            visitedSymbols.add(str)
+                        if(!(this.visitedSymbols.has(str))){
+                            this.visitedSymbols.add(str)
                             symbolStack.push(symbol)
                             this.balance++;
                             this.findReferences(symbol,socket)
@@ -71,8 +83,8 @@ export class SymbolFinder {
                             }
                             let str=JSON.stringify(symbol,undefined,2)
 
-                        if(!(visitedSymbols.has(str))){
-                            visitedSymbols.add(str)
+                        if(!(this.visitedSymbols.has(str))){
+                            this.visitedSymbols.add(str)
                             symbolStack.push(symbol)
                             this.balance++
                             this.findReferences(symbol,socket)
@@ -85,7 +97,7 @@ export class SymbolFinder {
 
                     console.log("#####################")
 
-                    for(let s of visitedSymbols){
+                    for(let s of this.visitedSymbols){
                         console.log(s)
                     }
                     console.log("##########################")
