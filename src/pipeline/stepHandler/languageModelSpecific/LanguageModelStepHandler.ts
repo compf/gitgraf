@@ -31,7 +31,7 @@ export class ProposalsNumberAttemptsProvider implements NumberAttemptsProvider{
         this.path=args.path
     }
     getNumberAttempts(context: ProjectContext): number {
-       let path=this.path??resolve(context.getProjectPath(),".data_clump_solver_data","proposals")
+       let path=this.path??resolve(context.getProjectPath(),".gitgraf_data","proposals")
        return fs.readdirSync(path).length
     }
 

@@ -62,7 +62,7 @@ export class FileFilterStepHandler extends AbstractStepHandler {
         let includePrevailFilter=new AllMultipleFilter({filters:[]})
         let excludeFilter: AnyMultipleFilter = new AnyMultipleFilter({ filters: [] })
         excludeFilter.filters.push(new GlobFilter({ glob: ".*\\.git/.*" }))
-        excludeFilter.filters.push(new GlobFilter({ glob: ".*\\.data_clump_solver_data/.*" }))
+        excludeFilter.filters.push(new GlobFilter({ glob: ".*\\.gitgraf_data/.*" }))
         includeNotPrevailFilter.filters.push(getProgrammingLanguageService().getFileExtensionGlobFilter())
         let includeFilter=includeNotPrevailFilter
         if(this.includePrevails){

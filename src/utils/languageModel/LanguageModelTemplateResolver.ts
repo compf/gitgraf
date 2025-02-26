@@ -1,8 +1,6 @@
 import fs from 'fs';
 export enum LanguageModelTemplateType {
-    FindDataClumps="find_data_clump_fully",
-    FullyRefactor="refactor_data_clump_fully",
-    SuggestName="suggest_name",
+
 }
 export const FILE_REPLACE_START="%{";
 export const IS_OPTIONAL_REFERENCE="?}"

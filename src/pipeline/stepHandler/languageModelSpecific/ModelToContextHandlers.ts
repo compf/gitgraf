@@ -130,7 +130,7 @@ export class MultipleBrancheHandler extends OutputHandler {
         let status = await git.status()
         let originalBranch = status.current!
         this.originalBranch = originalBranch;
-        await git.checkout("-Bdata_clump_proposal_" + this.counter++)
+        await git.checkout("-Bbranch_" + this.counter++)
         proposal.apply(context)
 
         await git.add("-A");

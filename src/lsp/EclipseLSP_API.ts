@@ -57,7 +57,7 @@ export class EclipseLSP_API extends LanguageServerAPI {
         if (!fs.existsSync(resolve("dist/eclipse.jdt.ls/org.eclipse.jdt.ls.product/target/repository"))) {
             throw new Error(`
                 Eclipse JDT LS not found. Please build the eclipse.jdt.ls project
-                Copy the project folder (eclipse.jdt.ls) into the 'dist folder' of the data_clump_solver project
+                Copy the project folder (eclipse.jdt.ls) into the 'dist folder' of the gitgraf project
                 `)
         }
         let epinoxPath = this.getEpinoxPath();
