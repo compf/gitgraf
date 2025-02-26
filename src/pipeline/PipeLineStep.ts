@@ -1,42 +1,67 @@
 import { AbstractStepHandler } from "./stepHandler/AbstractStepHandler"
 import { SimpleCodeObtainingStepHandler } from "./stepHandler/codeObtaining/SimpleCodeObtainingStepHandler";
 import { SimpleRelevantLocatioDectectionStep } from "./stepHandler/relevantLocationDetection/SimpleRelevantLocationDetectionStep";
-export type PipeLineStepName = "CodeObtaining" | "FileFiltering" | "RelevantLocationDetection" | "RelevantLocationFiltering" 
+export type PipeLineStepName = 
+    "CodeObtaining" | 
+    "FileFiltering" | 
+    "FileFilteringBranchController" | 
+    "RelevantLocationDetectionBranchController"|
+    "RelevantLocationDetection" | 
+    "RelevantLocationFilteringBranchController" |
+    "RelevantLocationFiltering";
+
+
+let counter=0;
 export type PipeLineStepType = {
     position: number,
     name: PipeLineStepName,
-    isRequired: boolean,
-    defaultHandler: AbstractStepHandler | undefined,
-    associatedContext: string|null
+    isBranchController: boolean,
+    defaultHandler?: string
 }
 export namespace PipeLineStep {
     export const CodeObtaining: PipeLineStepType = {
-        position: 0,
+        position: counter++,
         name: "CodeObtaining",
-        isRequired: true,
-        defaultHandler: new SimpleCodeObtainingStepHandler({useArgPath:true,path:null}),
-        associatedContext: "CodeObtainingContext"
+        isBranchController:false,
+        defaultHandler: "SimpleCodeObtainingStepHandler"
     };
+
+    export const FileFilteringBranchController: PipeLineStepType = {
+        position: counter++,
+        name: "FileFilteringBranchController",
+        isBranchController:true,
+        defaultHandler: "FileFilterBranchController"
+    }
     export const FileFiltering: PipeLineStepType = {
-        position: 1,
+        position: counter++,
         name: "FileFiltering",
-        isRequired: false,
+        isBranchController:false,
         defaultHandler: undefined,
-        associatedContext:"FileFilteringContext"
     };
+
+    export const RelevantLocationDetectionBranchController: PipeLineStepType = {
+        position: counter++,
+        name: "RelevantLocationDetectionBranchController",
+        isBranchController:true,
+        defaultHandler: undefined
+    }
     export const RelevantLocationDetection: PipeLineStepType = {
-        position: 1,
+        position: counter++,
         name: "RelevantLocationDetection",
-        isRequired: true,
-        defaultHandler: new SimpleRelevantLocatioDectectionStep(),
-        associatedContext:"FileFilteringContext"
+        isBranchController:false,
     };
+
+    export const RelevantLocationFilteringBranchController: PipeLineStepType = {
+        position: counter++,
+        name: "RelevantLocationFilteringBranchController",
+        isBranchController:true,
+        defaultHandler: undefined
+    }
     export const RelevantLocationFiltering: PipeLineStepType = {
-        position:5,
+        position:counter++,
         name: "RelevantLocationFiltering",
-        isRequired: false,
+        isBranchController:false,
         defaultHandler: undefined,
-        associatedContext:null
     };
 
     

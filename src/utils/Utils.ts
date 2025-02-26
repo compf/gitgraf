@@ -38,12 +38,34 @@ export function  shallIgnore(filePath: string,fileFilteringContext:FileFiltering
     if (fileFilteringContext == null) {
         return false
     }
+    let splitted=filePath.split(path.sep)
 
-    let includeGlobs = fileFilteringContext.includeGlobs
-    let excludeGlobs = fileFilteringContext.excludeGlobs
-    let isIncluded = includeGlobs.length == 0
+    let includeGlobs = fileFilteringContext.includeData.globs
+    let excludeGlobs = fileFilteringContext.excludeData.globs
+    let isIncluded =false;
     let isExcluded = false
     let includePrevails=fileFilteringContext.includePrevails
+    let current=fileFilteringContext.includeData.fileTree;
+    let oneIteration=false;
+    if(Object.keys(current).length>0){
+        for(let s of splitted){
+            if(s in current){
+                current=current[s];
+                oneIteration=true;
+            }
+            
+            else{
+                isIncluded=false;
+                oneIteration=false;
+                break;
+            }
+        }
+    }
+    if(oneIteration){
+        isIncluded=true;
+    }
+    
+ 
     for (let includeGlob of includeGlobs) {
         
        
@@ -53,6 +75,27 @@ export function  shallIgnore(filePath: string,fileFilteringContext:FileFiltering
             break
         }
     }
+    current=fileFilteringContext.excludeData.fileTree;
+    oneIteration=false;
+    if(Object.keys(current).length>0){
+        for(let s of splitted){
+            if(s in current){
+                current=current[s]
+                oneIteration=true;
+            }
+            else  {
+                isExcluded=false;
+                oneIteration=false;
+                break;
+            }
+    
+        }
+    }
+    if(oneIteration){
+        isExcluded=true;
+    }
+
+
     for (let excludeGlob of excludeGlobs) {
         if (filePath.match(excludeGlob)) {
             isExcluded = true

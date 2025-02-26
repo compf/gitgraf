@@ -6,6 +6,7 @@ import { Configuration } from "../config/Configuration";
 import simpleGit from "simple-git";
 import { ChatMessage } from "../utils/languageModel/AbstractLanguageModel";
 import { Range } from "vscode-languageserver";
+import { AbstractStepHandler } from "../pipeline/stepHandler/AbstractStepHandler";
 
 export function getContextSerializationBasePath(context:ProjectContext):string{
 const folderName=".gitgraf_data"
@@ -17,7 +18,6 @@ const folderName=".gitgraf_data"
             let exclude=fs.readFileSync(resolve(context.getProjectPath(),".git","info","exclude"),{encoding:"utf-8"})
             exclude+="\n"+folderName
             fs.writeFileSync(resolve(context.getProjectPath(),".git","info","exclude"),exclude)
-            fs.mkdirSync(resolve(context.getProjectPath(),folderName))
         }
     }
     return outputPath
@@ -117,6 +117,17 @@ export  class ProjectContext {
     }
 }
 
+export class NextStepContext extends ProjectContext{
+    private nextStep:AbstractStepHandler|null=null
+    constructor(nextStep:AbstractStepHandler) {
+        super()
+        this.nextStep=nextStep
+    }
+    getNextStep():AbstractStepHandler|null{
+        return this.nextStep
+    }
+}
+
 
 /**
  * Contains only the path of the project
@@ -184,19 +195,23 @@ export class GitRepositoryContext extends ProjectContext {
     
 
 }
-
+export type FileTree={[key:string]:FileTree}
+export type FilterInformation={
+    globs:string[],
+    fileTree:FileTree
+}
 /**
  * Context that contains include and exclude globs to filter files
  */
 export class FileFilteringContext extends ProjectContext {
-    includeGlobs: string[];
-    excludeGlobs: string[];
+    includeData:FilterInformation
+    excludeData:FilterInformation
     includePrevails: boolean=true;
     customFilters:boolean=false;
-    constructor(includeGlobs: string[], excludeGlobs: string[], includePrevails?: boolean) {
+    constructor(includeData: FilterInformation, excludeData: FilterInformation, includePrevails?: boolean) {
         super()
-        this.includeGlobs = includeGlobs
-        this.excludeGlobs = excludeGlobs
+        this.includeData = includeData
+        this.excludeData = excludeData
         this.includePrevails = includePrevails ?? true
     }
     getPosition(): number {

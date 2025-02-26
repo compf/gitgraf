@@ -10,19 +10,26 @@ import { PipeLineStep } from "../pipeline/PipeLineStep"
 import { PipeLine } from "../pipeline/PipeLine"
 import { FileFilteringContext, ProjectContext } from "../context/DataContext"
 import { getRelevantFilesRec } from "../utils/Utils"
+import { SingleItemFilter } from "../utils/filterUtils/SingleItemFilter"
+import { GlobFilter } from "../utils/filterUtils/GlobFilter"
+import { AnyMultipleFilter } from "../utils/filterUtils/AnyMultipleFilter"
 export type PipeLineStepConf={
     handler:string,
     contextSerializationPath?:string,
     args:any
 }
 export interface ProgrammingLanguageService {
-    getExtension(): string
+    getFileExtensionGlobFilter():SingleItemFilter
 }
 
-export class JavaService implements ProgrammingLanguageService {
-    getExtension(): string {
-        return ".java"
+export class ExtensionBasedService implements ProgrammingLanguageService {
+    private extensions:string[]
+    constructor(extensions:string[]){
+        this.extensions=extensions
     }
+   getFileExtensionGlobFilter(): SingleItemFilter {
+    return new AnyMultipleFilter( {filters:this.extensions.map((ext)=>new GlobFilter({glob:".*\\"+ext}))})
+   }
 }
 export type Configuration={
     ProgrammingLanguageIdentifier:string,
@@ -57,7 +64,20 @@ function createExcludePattern():string[]{
 function loadAllClasses(){
     let paths:string[]=[]
     let startTime=Date.now()
-    getRelevantFilesRec(resolve("./dist","src",),paths,new FileFilteringContext([".*\.js$"],createExcludePattern(),false))
+    let context=new FileFilteringContext(
+        {
+            globs:[".*\.js$"],
+            fileTree:{}
+        },
+        {
+            globs:createExcludePattern(),
+            fileTree:{}
+        },
+        false
+    );
+     
+    
+    getRelevantFilesRec(resolve("./dist","src",),paths,context)
     for(let path of paths){
         console.log("Loading "+path)
         if (path.endsWith("Configuration.js") || path.endsWith(".map")){
@@ -129,20 +149,14 @@ export function assignOrResolve(target:any, args:any, defaultValues:any){
     }
 }
 let programmingLanguageService:ProgrammingLanguageService
-export function setProgrammingLanguageService(name:string){
-    name=name.toLowerCase()
-    switch(name){
-        case "java":
-            programmingLanguageService=new JavaService()
-            break;
-    }
+export function setProgrammingLanguageService(extensions:string[]){
+    programmingLanguageService=new ExtensionBasedService(extensions)
 }
 
 export function getProgrammingLanguageService():ProgrammingLanguageService{
     return programmingLanguageService
 }   
 export function processConfiguration(config:Configuration){
-    setProgrammingLanguageService(config.ProgrammingLanguageIdentifier)
     for(let step of Object.keys(PipeLineStep)){
         if(config.PipeLine[step] && config.PipeLine[step].handler){
             registerFromName(config.PipeLine[step].handler,step,config.PipeLine[step].args)
@@ -164,20 +178,32 @@ export function processConfiguration(config:Configuration){
         let splitted=steps.split(",").map((x)=>x.trim())
         PipeLine.Instance.registerHandler(splitted.map((x)=>(PipeLineStep as any)[x] ),resolveFromConcreteName(splitted[0]) as AbstractStepHandler)
     }
-    if(!PipeLine.Instance.checkPipeLine()){
-        throw new Error("Pipeline is not correct")
-    }
+   
     
  
 }
 export function loadConfiguration(path:string):ProjectContext{
-    let config=JSON.parse(fs.readFileSync(path).toString()) as Configuration
-    let initialContext=new ProjectContext()
-    processConfiguration(config)
-    initialContext.setConfig(config)
-    return initialContext
+    if(fs.existsSync(path)){
+        let config=JSON.parse(fs.readFileSync(path).toString()) as Configuration
+        let initialContext=new ProjectContext()
+        processConfiguration(config)
+        initialContext.setConfig(config)
+        return initialContext
+    }
+    else{
+        return new ProjectContext();
+    }
+   
     
 }
+
+export function resolveNameOrReturn(it:  any): any {
+    if (typeof it === 'string') {
+        return resolveFromConcreteName(it);
+    }
+    return it;
+}
+
 export function activateLoader(){
     loadAllClasses()
 }

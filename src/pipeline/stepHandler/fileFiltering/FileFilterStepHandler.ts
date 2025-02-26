@@ -1,5 +1,5 @@
 import { assignOrResolve, getProgrammingLanguageService, resolveFromConcreteName } from "../../../config/Configuration";
-import { ProjectContext, FileFilteringContext } from "../../../context/DataContext";
+import { ProjectContext, FileFilteringContext, FilterInformation, FileTree } from "../../../context/DataContext";
 import { AllMultipleFilter } from "../../../utils/filterUtils/AllMultipleFilter";
 import { AnyMultipleFilter } from "../../../utils/filterUtils/AnyMultipleFilter";
 import { GlobFilter } from "../../../utils/filterUtils/GlobFilter";
@@ -11,7 +11,7 @@ import { PipeLineStepType, PipeLineStep } from "../../PipeLineStep";
 
 import { AbstractStepHandler } from "../AbstractStepHandler";
 import fs from "fs"
-import path from "path"
+import path, { resolve } from "path"
 
 export type FileFilterArgs = RankerArgs & {
     filter?: string | SingleItemFilter,
@@ -20,6 +20,7 @@ export type FileFilterArgs = RankerArgs & {
     exclude?: string[],
     useGitIgnore?: boolean
 }
+
 export class FileFilterStepHandler extends AbstractStepHandler {
     private filter?: SingleItemFilter = undefined
     private metric?: Metric = undefined
@@ -28,21 +29,46 @@ export class FileFilterStepHandler extends AbstractStepHandler {
     private exclude: string[] = []
     private includePrevails: boolean = true;
 
-    private useGitIgnore = true
+    private useGitIgnore = false
     async handle(step: PipeLineStepType, context: ProjectContext, params: any): Promise<ProjectContext> {
+        const hasInitialFiltersOrMetric = this.filter || this.metric
+       
+        if (this.metric != undefined && !this.metric?.isCompatibleWithString()) {
+            throw new Error("ranker is not compatible with string")
+        }
+
+        let originalPaths: string[] = []
+
+
+        getRelevantFilesRec(context.getProjectPath(), originalPaths, null);
+        let filterContext = await this.generateContextFromPaths(originalPaths,context)
+        
+      
+        if(this.metric && this.rankSampler){
+            originalPaths=[]
+            getRelevantFilesRec(context.getProjectPath(), originalPaths, filterContext)
+            originalPaths=(await this.rankSampler.rank(this.metric!!, originalPaths, context) as string[])
+           filterContext=await this.generateContextFromPaths(originalPaths,context)
+               
+            
+        }
+       
+        return context.buildNewContext(filterContext)
+
+    }
+    async generateContextFromPaths(originalPaths:string[],context:ProjectContext):Promise<FileFilteringContext>{
+        
         let includeNotPrevailFilter: AllMultipleFilter = new AllMultipleFilter({ filters: [] })
         let includePrevailFilter=new AllMultipleFilter({filters:[]})
         let excludeFilter: AnyMultipleFilter = new AnyMultipleFilter({ filters: [] })
         excludeFilter.filters.push(new GlobFilter({ glob: ".*\\.git/.*" }))
         excludeFilter.filters.push(new GlobFilter({ glob: ".*\\.data_clump_solver_data/.*" }))
-        includeNotPrevailFilter.filters.push(new GlobFilter({ glob: ".*\\" + getProgrammingLanguageService().getExtension() }))
+        includeNotPrevailFilter.filters.push(getProgrammingLanguageService().getFileExtensionGlobFilter())
         let includeFilter=includeNotPrevailFilter
         if(this.includePrevails){
             includeFilter=includePrevailFilter
         }
-        if (this.metric != undefined && !this.metric?.isCompatibleWithString()) {
-            throw new Error("ranker is not compatible with string")
-        }
+
         if (this.useGitIgnore && fs.existsSync(context.getProjectPath() + "/.gitignore")) {
 
             let gitIgnore = fs.readFileSync(context.getProjectPath() + "/.gitignore").toString()
@@ -71,12 +97,9 @@ export class FileFilterStepHandler extends AbstractStepHandler {
         if(this.filter){
             includeFilter.filters.push(this.filter)
         }
-        let originalPaths: string[] = []
-
-
-        getRelevantFilesRec(context.getProjectPath(), originalPaths, null)
-        let includeGlobs:string[]=[]
-        let excludeGlobs:string[]=[".*"]
+        let includeInformation: FilterInformation = { globs: [], fileTree: {} }
+        let excludeInformation: FilterInformation = { globs: [], fileTree: {} }
+   
         for(let p of originalPaths){
 
             let includedNoPrevail=await includeNotPrevailFilter.shallRemain(p,context)
@@ -85,29 +108,38 @@ export class FileFilterStepHandler extends AbstractStepHandler {
             let included=includedNoPrevail && includedPrevail
             if(includedPrevail && includePrevailFilter.filters.length>0 && excluded){
                 if(this.includePrevails ){
-                    includeGlobs.push(p)
+                    this.addFileToFileTree(includeInformation.fileTree,p,context)
+                }
+                else{
+                    this.addFileToFileTree(excludeInformation.fileTree,p,context)
                 }
                
             }
             else if(included && !excluded){
-                includeGlobs.push(p)
+                this.addFileToFileTree(includeInformation.fileTree,p,context)
+            }
+            else{
+                this.addFileToFileTree(excludeInformation.fileTree,p,context)
             }
            
         }
-        originalPaths=[]
-        getRelevantFilesRec(context.getProjectPath(), originalPaths, new FileFilteringContext(includeGlobs,excludeGlobs))
-       
-
-        if (this.metric && this.rankSampler) {
-
-            originalPaths=(await this.rankSampler.rank(this.metric!!, originalPaths, context) as string[])
-            includeGlobs=originalPaths
-           
-        }
-        return context.buildNewContext(new FileFilteringContext(includeGlobs,excludeGlobs))
-
+        return new FileFilteringContext(includeInformation, excludeInformation, this.includePrevails)
     }
-
+    addFileToFileTree(fileTree: FileTree, p: string,context:ProjectContext):void {
+        let splitted = p.split(path.sep)
+        let current = fileTree
+    
+       for(let s of splitted){
+              if(s in current){
+                current=current[s]
+              }
+              else{
+                current[s]={}
+                current=current[s]
+              }
+       }
+    }
+    
     getExecutableSteps(): PipeLineStepType[] {
         return [PipeLineStep.FileFiltering]
     }
