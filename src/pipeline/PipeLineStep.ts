@@ -1,6 +1,5 @@
 import { AbstractStepHandler } from "./stepHandler/AbstractStepHandler"
 import { SimpleCodeObtainingStepHandler } from "./stepHandler/codeObtaining/SimpleCodeObtainingStepHandler";
-import { SimpleRelevantLocatioDectectionStep } from "./stepHandler/relevantLocationDetection/SimpleRelevantLocationDetectionStep";
 export type PipeLineStepName = 
     "CodeObtaining" | 
     "FileFiltering" | 
@@ -8,7 +7,9 @@ export type PipeLineStepName =
     "RelevantLocationDetectionBranchController"|
     "RelevantLocationDetection" | 
     "RelevantLocationFilteringBranchController" |
-    "RelevantLocationFiltering";
+    "RelevantLocationFiltering" |
+    "ArtifactGenerationBranchController" |
+    "ArtifactGeneration";
 
 
 let counter=0;
@@ -49,6 +50,7 @@ export namespace PipeLineStep {
         position: counter++,
         name: "RelevantLocationDetection",
         isBranchController:false,
+        defaultHandler:"SimpleRelevantLocationDectectionStep"
     };
 
     export const RelevantLocationFilteringBranchController: PipeLineStepType = {
@@ -63,6 +65,20 @@ export namespace PipeLineStep {
         isBranchController:false,
         defaultHandler: undefined,
     };
+
+    export const ArtifactGenerationBranchController: PipeLineStepType = {
+        position: counter++,
+        name: "ArtifactGenerationBranchController",
+        isBranchController:true,
+        defaultHandler: undefined
+    };
+
+    export const ArtifactGeneration: PipeLineStepType = {
+        position: counter++,
+        name: "ArtifactGeneration",
+        isBranchController:false,
+        defaultHandler: "ExplainCodeArtificactGeneratorStepHandler"
+    }
 
     
     

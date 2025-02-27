@@ -148,7 +148,7 @@ export function assignOrResolve(target:any, args:any, defaultValues:any){
         }
     }
 }
-let programmingLanguageService:ProgrammingLanguageService
+let programmingLanguageService:ProgrammingLanguageService=new ExtensionBasedService(["java"])
 export function setProgrammingLanguageService(extensions:string[]){
     programmingLanguageService=new ExtensionBasedService(extensions)
 }

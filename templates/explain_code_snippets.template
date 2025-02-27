@@ -1,0 +1,16 @@
+Explain the following code snippets by considering all avaliable infomation.
+Use the following JSON format for your output:
+
+### JSON
+{
+    // for each file
+    "<path1>":[
+        // for each code snippet
+        {
+            "fromLine": <the fromLine>,
+            "toLine": <the toLine>,
+            "content": <The source code at those lines>,
+            "explanation": <Your explanation>
+        }
+    ]
+}

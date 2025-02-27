@@ -7,6 +7,7 @@ import simpleGit from "simple-git";
 import { ChatMessage } from "../utils/languageModel/AbstractLanguageModel";
 import { Range } from "vscode-languageserver";
 import { AbstractStepHandler } from "../pipeline/stepHandler/AbstractStepHandler";
+import { fileURLToPath } from "url";
 
 export function getContextSerializationBasePath(context:ProjectContext):string{
 const folderName=".gitgraf_data"
@@ -243,11 +244,13 @@ export  class RelevantLocationsContext extends ProjectContext{
     }
     getRelevantLocations(lines:{[path:string]:Set<number>}):void{
         for(let loc of this.relevantLocations){
-            if(!(loc.uri in lines)){
-                lines[loc.uri]=new Set<number>()
+            let p=fileURLToPath(loc.uri)
+
+            if(!(p in lines)){
+                lines[p]=new Set<number>()
             }
             for(let i=loc.location.start.line;i<=loc.location.end.line;i++){
-                lines[loc.uri].add(i)
+                lines[p].add(i)
             }
         }
     }
@@ -261,6 +264,13 @@ export  class RelevantLocationsContext extends ProjectContext{
     }
 }
 
+export class ArtifactGenerationContext extends ProjectContext {
+    public artifacts :(RelevantLocation & {llmOutput:string})[]
+    constructor(artifacts:(RelevantLocation & {llmOutput:string})[]) {
+        super()
+        this.artifacts=artifacts
+    }
+}
 
 
 export class EvaluationContext extends ProjectContext {

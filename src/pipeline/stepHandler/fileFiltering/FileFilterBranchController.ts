@@ -30,7 +30,7 @@ export class FileFilterBranchController extends AbstractStepHandler {
                 mostCommonExt=ext
             }
         }
-        setProgrammingLanguageService(([mostCommonExt]))
+        setProgrammingLanguageService((["java"]))
         let filterer=new FileFilterStepHandler({
          
         })
