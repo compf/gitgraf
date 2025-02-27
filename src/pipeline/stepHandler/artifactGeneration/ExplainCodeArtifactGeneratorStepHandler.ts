@@ -10,7 +10,7 @@ export class ExplainCodeArtificactGeneratorStepHandler extends AbstractStepHandl
     private handler:LargeLanguageModelHandler=new CodeSnippetHandler({additionalMargin:1})
     async handle(step: PipeLineStepType, context: ProjectContext, params: any): Promise<ProjectContext> {
         let llm=new ChatGPTInterface({
-            model:"gpt-4o",
+            model:"gpt-4o-mini",
             temperature:0.9,
             format:"json_object"
         })
@@ -18,7 +18,6 @@ export class ExplainCodeArtificactGeneratorStepHandler extends AbstractStepHandl
         let relContext=context.getByType(RelevantLocationsContext)!
         let instruction=new SimpleInstructionHandler({instructionPath:"templates/explain_code_snippets.template"})
         await instruction.handle(context,llm,new LanguageModelTemplateResolver({}))
-        llm.prepareMessage("Explain the following code snippet. Answer in JSON","system")
         await this.handler.handle(context,llm,new LanguageModelTemplateResolver({}));
       
         let res=await llm.sendMessages(true)

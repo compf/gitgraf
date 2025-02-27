@@ -196,6 +196,12 @@ export class GitRepositoryContext extends ProjectContext {
     
 
 }
+
+export class ProjectInformationContext extends ProjectContext {
+    constructor(public mostCOmmonFileExtesnion:string) {
+        super();
+    }
+}
 export type FileTree={[key:string]:FileTree}
 export type FilterInformation={
     globs:string[],

@@ -189,7 +189,7 @@ export class CodeSnippetHandler extends LargeLanguageModelHandler {
                 continue;
             }
             else if (line - lastLine > 1) {
-                let block = { fromLine, toLine: lastLine, content: content.split("\n").slice(fromLine - 1, lastLine).join("\n") }
+                let block = { fromLine, toLine: lastLine, content: content.split("\n").slice(fromLine , lastLine).join("\n") }
                 Object.assign(block, additionalData)
                 blocks.push(block)
                 fromLine = line

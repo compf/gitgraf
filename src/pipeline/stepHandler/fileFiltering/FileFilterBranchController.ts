@@ -1,11 +1,39 @@
 import path from "path"
-import { NextStepContext, ProjectContext } from "../../../context/DataContext"
+import { NextStepContext, ProjectContext, ProjectInformationContext } from "../../../context/DataContext"
 import { getRelevantFilesRec } from "../../../utils/Utils"
 import { PipeLineStep, PipeLineStepType } from "../../PipeLineStep"
 import { AbstractStepHandler } from "../AbstractStepHandler"
 import { FileFilterStepHandler } from "./FileFilterStepHandler"
 import { ExtensionBasedService, setProgrammingLanguageService } from "../../../config/Configuration"
+import { RandomMetric } from "../../../utils/filterUtils/RandomRanker"
 
+const commonProgrammingLanguageExtensions=[
+    ".java",
+    ".kt",
+    ".ts",
+    ".js",
+    ".py",
+    ".c",
+    ".cpp",
+    ".h",
+    ".hpp",
+    ".rb",
+    ".cs",
+    ".php",
+    ".html",
+    ".css",
+    ".scss",
+    ".less",
+    ".xml",
+    ".json",
+    ".yaml",
+    ".yml",
+    ".sql",
+    ".sh",
+    ".bat",
+    ".cmd",
+    ".ps1",
+]
 export class FileFilterBranchController extends AbstractStepHandler {
     async handle(step: PipeLineStepType, context: ProjectContext, params: any): Promise<ProjectContext> {
         let paths:string[] =[]
@@ -25,17 +53,21 @@ export class FileFilterBranchController extends AbstractStepHandler {
         let max=-1;
         let mostCommonExt=""
         for(let ext in extensionCounter){
-            if(extensionCounter[ext]>max){
+            if(extensionCounter[ext]>max && commonProgrammingLanguageExtensions.includes(ext)){
                 max=extensionCounter[ext]
                 mostCommonExt=ext
             }
         }
-        setProgrammingLanguageService((["java"]))
+        setProgrammingLanguageService(([mostCommonExt.slice(1)]));
+        let numberFiles=Math.pow(paths.length,0.3);
         let filterer=new FileFilterStepHandler({
-         
+            rankThreshold:numberFiles,
+            metric: new RandomMetric()
         })
         console.log(filterer["include"])
-        return  context.buildNewContext(new NextStepContext(filterer))
+        context=context.buildNewContext(new ProjectInformationContext(mostCommonExt.slice(1)))
+        context=  context.buildNewContext(new NextStepContext(filterer))
+        return context;
        
     }
     getExecutableSteps(): PipeLineStepType[] {

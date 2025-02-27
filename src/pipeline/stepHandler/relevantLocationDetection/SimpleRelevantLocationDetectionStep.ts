@@ -3,7 +3,7 @@ import url  from "url"
 import { SymbolInformation, DocumentSymbolParams, ReferenceParams } from "vscode-languageserver";
 import { FileFilteringContext, ProjectContext, RelevantLocation, RelevantLocationsContext } from "../../../context/DataContext";
 import { EclipseLSP_API, Socket } from "../../../lsp/EclipseLSP_API";
-import { Methods } from "../../../lsp/LanguageServerAPI";
+import { LanguageServerAPI, Methods } from "../../../lsp/LanguageServerAPI";
 import { PipeLineStepType, PipeLineStep } from "../../PipeLineStep";
 import { AbstractStepHandler } from "../AbstractStepHandler";
 import {getRelevantFilesRec} from "../../../utils/Utils"
@@ -20,12 +20,26 @@ export class SimpleRelevantLocationDectectionStep extends AbstractStepHandler {
     }
 
     counter: number = 3;
-    api: EclipseLSP_API = new EclipseLSP_API()
+    api: LanguageServerAPI = new EclipseLSP_API()
     balance:number=0;
     visitedSymbols = new Set<string>()
     projectPathUrl?:string;
     projectPath?:string;
 
+    constructor(args:{
+        languageName:string
+    }){
+        super();
+        this.api=this.getApi(args.languageName);
+    }
+
+    getApi(languageName:string):LanguageServerAPI{
+        return new EclipseLSP_API()
+    }
+
+    checkCompatibleWithSystem(): void {
+        return this.api.checkCompatibleWithSystem()
+    }
 
 
 
