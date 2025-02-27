@@ -1,10 +1,10 @@
-import {  ProjectContext } from "../../context/DataContext";
+import {  ProjectContext, RelevantLocation } from "../../context/DataContext";
+export type PathOrRelevantLocation =string | RelevantLocation
 export interface FilterOrMetric{
-    isCompatibleWithDataClump():boolean;
     isCompatibleWithString():boolean;
 
 }
 export interface SingleItemFilter extends FilterOrMetric {
-    shallRemain(data: any,context:ProjectContext): Promise<boolean>;
+    shallRemain(data: PathOrRelevantLocation,context:ProjectContext): Promise<boolean>;
   
 }

@@ -1,16 +1,15 @@
 import {  ProjectContext, GitRepositoryContext } from "../../context/DataContext";
-import { SingleItemFilter } from "./SingleItemFilter";
+import { PathOrRelevantLocation, SingleItemFilter } from "./SingleItemFilter";
 import { Metric } from "./Metric";
 
 export abstract class FileUpdateMetric implements Metric {
-    async evaluate(data: any,context:ProjectContext): Promise<number> {
+    async evaluate(data: PathOrRelevantLocation,context:ProjectContext): Promise<number> {
         let relevantPaths: string[] = []
         if (typeof data === "string") {
             relevantPaths.push(data)
         }
         else {
-            relevantPaths.push(data.from_file_path)
-            relevantPaths.push(data.to_file_path)
+            relevantPaths.push(data.uri)
         }
         let gitContext = context.getByType(GitRepositoryContext)
         if(gitContext==null){
@@ -28,9 +27,7 @@ export abstract class FileUpdateMetric implements Metric {
 
     abstract evaluateTimestamps(timestamps: Date[]): number
 
-    isCompatibleWithDataClump(): boolean {
-        return true
-    }
+ 
     isCompatibleWithString(): boolean {
         return true
     }

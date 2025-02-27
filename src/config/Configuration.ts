@@ -46,9 +46,7 @@ const nameScriptFileMap:{[key:string]:any}={
     
 }
 
-export function getDataClumpThreshold(dataClumpTyo:string):number{
-    return 3;
-}
+
 function createExcludePattern():string[]{
     if(sep=="\\"){
         return [resolve("dist","eclipse.jdt.ls").replaceAll("\\","\\\\")+sep+".*",".*js\.ma"]

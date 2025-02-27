@@ -1,5 +1,5 @@
 import {  ProjectContext } from "../../context/DataContext";
-import { FilterOrMetric } from "./SingleItemFilter";
+import { FilterOrMetric, PathOrRelevantLocation } from "./SingleItemFilter";
 import { Metric } from "./Metric";
 import { InitializationRequiredMetric } from "./MetricCombiner"
 function isInitializationRequired(object: any): object is InitializationRequiredMetric {
@@ -9,7 +9,6 @@ function isInitializationRequired(object: any): object is InitializationRequired
 export type RankerArgs = {
     rankThreshold?: number,
     rankSign?: number,
-    differentDataClumps?: boolean,
     strictSize?: boolean
 
 }
@@ -18,17 +17,16 @@ import { assignOrResolve } from "../../config/Configuration";
 export class Ranker {
     private rankThreshold: number | null = null
     private rankSign: number | null = null;
-    private differentDataClumps: boolean = true;
     private strictSize: boolean = false;
     constructor(args: RankerArgs) {
         assignOrResolve(this, args,{})
     }
-    protected getKey(data: any, context: ProjectContext): string {
+    protected getKey(data: PathOrRelevantLocation, context: ProjectContext): string {
         if (typeof data === "string") {
             return data
         }
         else {
-            return data.typeName + data
+            return  JSON.stringify( data);
         }
 
         
@@ -82,7 +80,7 @@ export class Ranker {
             let typeNameKey = this.getKey(r, context)
             key_item[typeNameKey] = r
             
-            const compareCount = !this.differentDataClumps ? Object.values(key_item).flat().length : Object.keys(key_item).length
+            const compareCount = Object.keys(key_item).length
             if (compareCount >= this.rankThreshold!) {
                 break;
             }

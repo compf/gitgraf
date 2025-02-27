@@ -1,9 +1,10 @@
 import { resolveFromConcreteName } from "../../config/Configuration";
 import { Metric } from "./Metric";
 import {  ProjectContext } from "../../context/DataContext";
+import { PathOrRelevantLocation } from "./SingleItemFilter";
 export type MetricWeight = { name: string, weight: number, metric?: Metric }
 export interface InitializationRequiredMetric{
-    initialize(data: any, context: ProjectContext):Promise<void>;
+    initialize(data: PathOrRelevantLocation, context: ProjectContext):Promise<void>;
 }
 export class MetricCombiner implements Metric, InitializationRequiredMetric{
     private metrics: MetricWeight[] = [];
@@ -26,7 +27,7 @@ export class MetricCombiner implements Metric, InitializationRequiredMetric{
         key= btoa(key)
         return key
     }
-    async evaluate(data: any, context: ProjectContext): Promise<number> {
+    async evaluate(data: PathOrRelevantLocation, context: ProjectContext): Promise<number> {
         let result = 0;
         let key=this.getKey(data,context);
         (context as any)[key]={};
@@ -46,16 +47,14 @@ export class MetricCombiner implements Metric, InitializationRequiredMetric{
         (context as any)[key].metrics["combined"]=result;
         return result;
     }
-    isCompatibleWithDataClump(): boolean {
-        return this.metrics.every((it) => it.metric!.isCompatibleWithDataClump());
-    }
+
     isCompatibleWithString(): boolean {
         return this.metrics.every((it) => it.metric!.isCompatibleWithString());
     }
     private metricsStat:{[name:string]:{
         min:number,max:number
     }}={}
-   async initialize(data: any, context: ProjectContext):Promise<void>{
+   async initialize(data: PathOrRelevantLocation, context: ProjectContext):Promise<void>{
         for (let metric of this.metrics) {
             let r = await metric.metric!.evaluate(data, context);
            if(!(metric.name in this.metricsStat)){

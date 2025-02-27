@@ -2,7 +2,7 @@ import { assignOrResolve } from "../../config/Configuration";
 import { ProjectContext } from "../../context/DataContext";
 import { compareTo } from "../Utils";
 import { Metric } from "./Metric";
-import { SingleItemFilter } from "./SingleItemFilter";
+import { PathOrRelevantLocation, SingleItemFilter } from "./SingleItemFilter";
 
 export type ComparisionSign=">"|"<"|"<="|">="|"="
 /**
@@ -37,13 +37,11 @@ export  class NumericalThresholdBasedFilter    implements SingleItemFilter{
         
 
     }
-    isCompatibleWithDataClump(): boolean {
-        return this.metric?.isCompatibleWithDataClump() ?? false;
-    }
+
     isCompatibleWithString(): boolean {
         return this.metric?.isCompatibleWithString() ?? false;
     }
-    public async shallRemain(data: any,context:ProjectContext): Promise<boolean> {
+    public async shallRemain(data: PathOrRelevantLocation,context:ProjectContext): Promise<boolean> {
         let occurences=await this.metric!.evaluate(data,context)
         return  this.requiredCompareSigns.includes(compareTo(occurences, this.threshold)) 
    

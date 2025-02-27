@@ -31,7 +31,7 @@ import { CodeObtainingContext, FileFilteringContext, ProjectContext } from "../s
 import { FilterBasedMetric } from "../src/utils/filterUtils/FilterBasedMetric";
 import { Metric } from "../src/utils/filterUtils/Metric";
 import { Ranker } from "../src/utils/filterUtils/Ranker";
-import { SingleItemFilter } from "../src/utils/filterUtils/SingleItemFilter";
+import { PathOrRelevantLocation, SingleItemFilter } from "../src/utils/filterUtils/SingleItemFilter";
 import { NumericalThresholdBasedFilter } from "../src/utils/filterUtils/NumericalThresholdBasedFilter";
 import { ExtensionBasedService, setProgrammingLanguageService } from "../src/config/Configuration";
 setProgrammingLanguageService([".java"])
@@ -70,22 +70,17 @@ class MustContainNumberFilter implements SingleItemFilter{
     async shallRemain(item: string, context: ProjectContext): Promise<boolean> {
         return item.match(/\d+/)!=null
     }
-    isCompatibleWithDataClump(): boolean {
-        return false;
-    }
+
 }
 
 class NumberFromFileNameMetric implements Metric{
-    async evaluate(data: any, context: ProjectContext): Promise<number> {
+    async evaluate(data: PathOrRelevantLocation, context: ProjectContext): Promise<number> {
         let path=data as string
         let match=path.match(/\d+/)
         if(match==null){
             return 0
         }
         return parseInt(match[0])
-    }
-    isCompatibleWithDataClump(): boolean {
-        return false;
     }
     isCompatibleWithString(): boolean {
         return true

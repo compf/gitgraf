@@ -10,9 +10,7 @@ export class GlobFilter implements SingleItemFilter{
         return m!=null
 
     }
-    isCompatibleWithDataClump(): boolean {
-        return false;
-    }
+
     isCompatibleWithString(): boolean {
         return true
     }
