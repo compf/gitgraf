@@ -28,7 +28,7 @@ export class ExtensionBasedService implements ProgrammingLanguageService {
         this.extensions=extensions
     }
    getFileExtensionGlobFilter(): SingleItemFilter {
-    return new AnyMultipleFilter( {filters:this.extensions.map((ext)=>new GlobFilter({glob:".*\\"+ext}))})
+    return new AnyMultipleFilter( {filters:this.extensions.map((ext)=>new GlobFilter({glob:".*\\."+ext}))})
    }
 }
 export type Configuration={

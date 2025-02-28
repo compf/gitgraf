@@ -3,22 +3,45 @@ import { ProjectContext } from "../../context/DataContext";
 import { Metric } from "./Metric";
 import { PathOrRelevantLocation } from "./SingleItemFilter";
 import { fileURLToPath } from "url";
+const complexChars={
+    "<":null,
+    ">":null,
+    "(":null,
+    ")":null,
+    "{":null,
+    "}":null,
+    "[":null,
+    "]":null,
+    "+":null,
+    "-":null,
+    "*":null,
+    "/":null,
+    "%":null,
+    "=":null,
+    ":":null,
 
+
+}
 export class ComplexityMetric implements Metric{
     isCompatibleWithString(): boolean {
         return true;
     }
 
     async evaluate(data: PathOrRelevantLocation, context: ProjectContext): Promise<number> {
-        let result=0;
+        let content="";
 
         if(typeof(data)=="string"){
-            result=fs.statSync(data).size
+            content=fs.readFileSync(data).toString()
         }
         else{
-            let content=fs.readFileSync(fileURLToPath(data.uri)).toString().split("\n")
-            result=content.splice(data.location.start.line,data.location.end.line).reduce((acc,curr)=>acc+curr.length,0)
+             content=fs.readFileSync(fileURLToPath(data.uri)).toString().split("\n").slice(data.location.start.line,data.location.end.line).join("\n")
         }
-        return result
+        let counter=0;
+        for(let c of content){
+            if(c in complexChars){
+                counter++
+            }
+        }
+        return counter;
     }
 }

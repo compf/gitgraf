@@ -24,11 +24,11 @@ export class ExplainCodeArtificactGeneratorStepHandler extends AbstractStepHandl
             temperature:0.9,
             format:"json_object"
         })
-        llm=new StubInterface(
+        /*llm=new StubInterface(
             {
                 responsePath:"/home/compf/data/PokemonSirius/core/.gitgraf_data/proposals/response1740738398774.json"
             }
-        )
+        )*/
 
         let relContext=context.getByType(RelevantLocationsContext)!
         let instruction=new SimpleInstructionHandler({instructionPath:"templates/explain_code_snippets.template"})

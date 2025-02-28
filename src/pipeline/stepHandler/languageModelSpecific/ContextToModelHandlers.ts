@@ -164,7 +164,7 @@ enum ExtractionDirection { Up, Down, UpAndDown }
 
 export class CodeSnippetHandler extends LargeLanguageModelHandler {
     protected additionalMargin = 0
-    private includeHeader = true;
+    private includeHeader = false;
     generateLines(centerLine: number, margin: number, extractionDirection: ExtractionDirection, lines: Set<number>) {
         let start = extractionDirection == ExtractionDirection.Up || extractionDirection == ExtractionDirection.UpAndDown ? centerLine - margin : centerLine;
         let end = extractionDirection == ExtractionDirection.Down || extractionDirection == ExtractionDirection.UpAndDown ? centerLine + margin : centerLine;
