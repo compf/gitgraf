@@ -357,10 +357,10 @@ export function setCurrLabel(label:string){
             return res;
 
         }
-        catch{
-            
+        catch(ex){
+            console.error("Error in parsing JSON",ex)
         }
-        return 
+        return null
     }
     else{
         return result;
@@ -373,6 +373,32 @@ export function setCurrLabel(label:string){
  */
 export function parseInvalidJSON(jsonString:string){
    return parseUsingJsonRepair(jsonString)  
+}
+
+export function bisectParseInvalidJSON(jsonString:string){
+    let result=tryParseJSON(jsonString)
+    if(result){
+        return result;
+    }
+    else{
+        return bisectParseInvalidJSONRec(jsonString,0,1,10,null)
+    }
+}
+function bisectParseInvalidJSONRec(jsonString:string, left:number, right:number,depth:number, lastValid:any){
+    if(depth<0){
+        return lastValid;
+    }
+    let perc=(left+right)/2
+    let length=jsonString.length*perc;
+    let sliced=jsonString.slice(0,length)
+    let res=parseInvalidJSON(sliced)
+    if(res){
+        return bisectParseInvalidJSONRec(jsonString,perc,right,depth-1,res)
+    }
+    else{
+        return bisectParseInvalidJSONRec(jsonString,left,perc,depth-1,lastValid)
+    }
+
 }
 
 /**

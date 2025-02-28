@@ -6,6 +6,7 @@ import { AbstractStepHandler } from "../AbstractStepHandler"
 import { FileFilterStepHandler } from "./FileFilterStepHandler"
 import { ExtensionBasedService, setProgrammingLanguageService } from "../../../config/Configuration"
 import { RandomMetric } from "../../../utils/filterUtils/RandomRanker"
+import { ComplexityMetric } from "../../../utils/filterUtils/ComplexityMetric"
 
 const commonProgrammingLanguageExtensions=[
     ".java",
@@ -59,10 +60,10 @@ export class FileFilterBranchController extends AbstractStepHandler {
             }
         }
         setProgrammingLanguageService(([mostCommonExt.slice(1)]));
-        let numberFiles=Math.pow(paths.length,0.3);
+        let numberFiles=Math.pow(paths.length,0.6);
         let filterer=new FileFilterStepHandler({
             rankThreshold:numberFiles,
-            metric: new RandomMetric()
+            metric: new ComplexityMetric()
         })
         console.log(filterer["include"])
         context=context.buildNewContext(new ProjectInformationContext(mostCommonExt.slice(1)))
