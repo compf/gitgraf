@@ -91,7 +91,7 @@ export  class ProjectContext {
         }
         return best as T;
     }
-    getRelevantLocation():RelevantLocationsContext|null{
+    getRelevantLocationContext():RelevantLocationsContext|null{
         let curr: ProjectContext = this;
         while (!("getRelevantLocations" in curr)) {
             curr = curr.previousContext!

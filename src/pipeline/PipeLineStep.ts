@@ -50,7 +50,7 @@ export namespace PipeLineStep {
         position: counter++,
         name: "RelevantLocationDetection",
         isBranchController:false,
-        defaultHandler:"SimpleRelevantLocationDectectionStep"
+        defaultHandler:"LargeLinesAreRelevantDetectionStepHandler"
     };
 
     export const RelevantLocationFilteringBranchController: PipeLineStepType = {

@@ -2,7 +2,7 @@ import { NextStepContext, ProjectContext } from "../../../context/DataContext";
 import { PipeLineStep, PipeLineStepType } from "../../PipeLineStep";
 import { AbstractStepHandler } from "../AbstractStepHandler";
 
-export class LSP_BasedRelevantLocationDetectBranchController extends AbstractStepHandler {
+export class RelevantLocationDetectBranchController extends AbstractStepHandler {
   
     getExecutableSteps(): PipeLineStepType[] {
         return [PipeLineStep.RelevantLocationDetectionBranchController];

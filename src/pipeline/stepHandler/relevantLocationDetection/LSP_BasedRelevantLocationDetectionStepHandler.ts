@@ -7,7 +7,7 @@ import { LanguageServerAPI, Methods } from "../../../lsp/LanguageServerAPI";
 import { PipeLineStepType, PipeLineStep } from "../../PipeLineStep";
 import { AbstractStepHandler } from "../AbstractStepHandler";
 import {getRelevantFilesRec} from "../../../utils/Utils"
-export class SimpleRelevantLocationDectectionStep extends AbstractStepHandler {
+export class LSP_BasedRelevantLocationDetectionStep extends AbstractStepHandler {
     handle(step: PipeLineStepType, context: ProjectContext, params: any): Promise<ProjectContext> {
         return this.findSymbols(context)
        

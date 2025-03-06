@@ -52,7 +52,7 @@ export class AllFilesHandler extends LargeLanguageModelHandler {
     preCheck(context:ProjectContext){
         this.counter = 0
         this.sendNewFiles=true;
-        let usageContext = context.getRelevantLocation();
+        let usageContext = context.getRelevantLocationContext();
         if (usageContext == null) {
             throw new Error("Usage context not found")
         }
@@ -77,7 +77,7 @@ export class AllFilesHandler extends LargeLanguageModelHandler {
     handle(context: ProjectContext, api: AbstractLanguageModel, templateResolver: LanguageModelTemplateResolver): Promise<ChatMessage[]> {
         this.counter = 0
         this.sendNewFiles=true;
-        let usageContext = context.getRelevantLocation();
+        let usageContext = context.getRelevantLocationContext();
         if (usageContext == null) {
             throw new Error("Usage context not found")
         }
@@ -227,7 +227,7 @@ export class CodeSnippetHandler extends LargeLanguageModelHandler {
 
     }
     handle(context: ProjectContext, api: AbstractLanguageModel, templateResolver: LanguageModelTemplateResolver): Promise<ChatMessage[]> {
-        let usageContext = context.getRelevantLocation();
+        let usageContext = context.getRelevantLocationContext();
         if (usageContext == null) {
             throw new Error("Usage context not found")
         }
