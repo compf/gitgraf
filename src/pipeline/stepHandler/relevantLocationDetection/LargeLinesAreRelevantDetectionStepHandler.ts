@@ -3,7 +3,7 @@ import { getRelevantFilesRec } from "../../../utils/Utils";
 import { PipeLineStep, PipeLineStepType } from "../../PipeLineStep";
 import { AbstractStepHandler } from "../AbstractStepHandler";
 import fs from "fs"
-export class LargeLinesAreRelevantDetectionStep extends AbstractStepHandler {
+export class LargeLinesAreRelevantDetectionStepHandler extends AbstractStepHandler {
     private minLineLength: number = 30;
 
     addCreatedContextNames(pipeLineStep: PipeLineStepType, createdContexts: Set<string>): void {
